@@ -34,17 +34,6 @@ include('dashboard_functions.php');
         </div>
     </div>
 
-    <!-- Recent Activities -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <h3 class="card-title">Recent Activities</h3>
-            <?php
-            // Implement logic to fetch and display recent activities from the database
-            // You can use a similar approach as in previous examples
-            ?>
-        </div>
-    </div>
-
     <!-- System Health -->
     <div class="card mb-4">
         <div class="card-body">

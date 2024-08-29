@@ -3,6 +3,36 @@ include("header.php");
 include("../includes/login_check.inc.php");
 include("../includes/dbh.inc.php");
 
+function getVerificationStatus($user_id)
+{
+    global $conn;
+
+    $sql = "SELECT verification_status FROM users WHERE user_id = ?";
+    $stmt = mysqli_stmt_init($conn);
+
+    if (mysqli_stmt_prepare($stmt, $sql)) {
+        mysqli_stmt_bind_param($stmt, "i", $user_id);
+        mysqli_stmt_execute($stmt);
+        $result = mysqli_stmt_get_result($stmt);
+
+        if ($row = mysqli_fetch_assoc($result)) {
+            return $row['verification_status'];
+        }
+    }
+}
+
+$user_id = $_SESSION['user_id']; // Assuming you store user_id in the session after login
+
+$verification_status = getVerificationStatus($user_id);
+
+if ($verification_status === 'unverified') {
+    echo '<script>
+            alert("Your account is not verified. Please verify your account to be able to report an item.");
+            window.location="update_profile.php";
+          </script>';
+    exit();
+}
+
 $sql = "SELECT category_id, category_name FROM item_categories";
 $result = $conn->query($sql);
 
@@ -21,7 +51,7 @@ $conn->close();
     <div class="row justify-content-center">
         <div class="col-md-6 report-item-form">
             <h1 class="text-center">Report An Item</h1>
-            <form action="../includes/report_item.inc.php" method="post" enctype="multipart/form-data">
+            <form id="reportItemForm" action="includes/report_item.inc.php" method="post" enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="item_name">Item Name:</label>
                     <input type="text" class="form-control" name="item_name" required>
@@ -36,6 +66,11 @@ $conn->close();
                     <label for="location">Location:</label>
                     <input type="text" class="form-control" name="location" required>
                 </div>
+
+                <div class="form-group">
+                    <label for="report_type">Report To:</label>
+                    <input type="radio" name="report_type" value="public" checked> Public
+                </div><br>
 
                 <div class="form-group">
                     <label for="lost_or_found">Lost or Found:</label>
@@ -64,8 +99,9 @@ $conn->close();
                         style="display: none;">
                 </div>
 
-                <button class="btn btn-dark" type="submit">Submit</button>
+                <button class="btn btn-dark" type="button" onclick="confirmReport()">Submit</button>
             </form>
+
         </div>
     </div>
 </div>
@@ -77,6 +113,23 @@ function previewImage(input) {
         $('#item-image-preview').attr('src', e.target.result).show();
     };
     reader.readAsDataURL(input.files[0]);
+}
+
+function confirmReport() {
+    if (confirm("Are you sure you want to report this item?")) {
+        // If user confirms, submit the form
+        document.getElementById("reportItemForm").submit();
+    } else {
+        // If user cancels, do nothing
+    }
+
+    // Show or hide security note based on selected report type
+    var reportType = $('input[name="report_type"]:checked').val();
+    if (reportType === 'security') {
+        $('#securityNote').show();
+    } else {
+        $('#securityNote').hide();
+    }
 }
 </script>
 

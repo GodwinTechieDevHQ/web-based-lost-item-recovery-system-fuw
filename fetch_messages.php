@@ -1,55 +1,45 @@
 <!-- fetch_messages.php -->
 
 <?php
-// Include your database connection
+// Replace with your actual database connection logic
 include('includes/dbh.inc.php');
 
-// Retrieve user IDs from the AJAX request and sanitize them to prevent injection
-$user_id = intval($_GET['user_id']);
-$other_user_id = intval($_GET['other_user_id']);
+// Retrieve user IDs from the AJAX request
+$user_id = $_GET['user_id'];
+$other_user_id = $_GET['other_user_id'];
 
-// Fetch new messages based on the user IDs
+// Fetch new messages from the database (replace with your actual query)
 $messages = fetchNewMessages($user_id, $other_user_id);
 
-// Prepare and send JSON response with the messages
+// JSON response
 $response = array('messages' => includeMessages($messages, $user_id));
 echo json_encode($response);
 
-// Function to fetch new messages from the database
 function fetchNewMessages($user_id, $other_user_id) {
-    global $conn; // Access the global database connection
+    // Replace this with your actual database query to fetch new messages
+    // Example: SELECT * FROM private_messages WHERE (sender_id = $user_id AND receiver_id = $other_user_id) OR (sender_id = $other_user_id AND receiver_id = $user_id) AND timestamp > '$last_timestamp';
 
-    // SQL query to get messages between the two users
-    $sql = "SELECT sender_id, message_text, timestamp FROM private_messages
-            WHERE (sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)
-            AND timestamp > NOW() - INTERVAL 1 DAY"; // Fetch messages from the last day
-    $stmt = $conn->prepare($sql); // Prepare the SQL statement
-    $stmt->bind_param("iiii", $user_id, $other_user_id, $other_user_id, $user_id); // Bind user IDs to the query
-    $stmt->execute(); // Execute the query
-    $result = $stmt->get_result(); // Get the result
+    // For this example, I'm using a static array. Replace this with your database logic.
+    $messages = array(
+        array('sender_id' => $user_id, 'message_text' => 'New message!', 'timestamp' => '2023-11-03 16:00:00'),
+        // Add more new messages as needed
+    );
 
-    $messages = array();
-    while ($row = $result->fetch_assoc()) {
-        $messages[] = $row; // Add each message to the array
-    }
-
-    return $messages; // Return the array of messages
+    return $messages;
 }
 
-// Function to format messages for display
 function includeMessages($messages, $user_id) {
-    ob_start(); // Start output buffering
+    // Function to include messages in the chat container
+    ob_start();
     foreach ($messages as $message) {
-        // Check if the message is from the current user
         $isCurrentUser = ($message['sender_id'] == $user_id);
-        $messageClass = $isCurrentUser ? 'sent' : 'received'; // Assign class based on sender
+        $messageClass = $isCurrentUser ? 'sent' : 'received';
 
-        // Output the message with appropriate class
         echo '<div class="message ' . $messageClass . '">';
-        echo '<p>' . htmlspecialchars($message['message_text'], ENT_QUOTES, 'UTF-8') . '</p>'; // Escape message text
-        echo '<span>' . htmlspecialchars($message['timestamp'], ENT_QUOTES, 'UTF-8') . '</span>'; // Escape timestamp
+        echo '<p>' . $message['message_text'] . '</p>';
+        echo '<span>' . $message['timestamp'] . '</span>';
         echo '</div>';
     }
-    return ob_get_clean(); // Return the buffered output
+    return ob_get_clean();
 }
 ?>

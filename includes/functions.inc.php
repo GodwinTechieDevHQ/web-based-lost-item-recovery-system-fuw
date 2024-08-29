@@ -32,7 +32,8 @@ function validatePhoneNumber($phone_number)
 // Function to check if the password follows the specified regex
 function validatePassword($password)
 {
-    $passwordRegex = "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{6,}$/";
+    $passwordRegex = "/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@.])[a-zA-Z\d@.]{6,}$/";
+
 
     if (!preg_match($passwordRegex, $password)) {
         // Redirect to signup page with an error message
@@ -180,20 +181,29 @@ function loginUser($matriculation_number, $password, $user_type = 'user')
     }
 }
 
-function report_item($item_name, $description, $location, $lost_or_found, $category, $image, $user_id)
+function report_item($item_name, $description, $location, $lost_or_found, $category, $image, $user_id, $report_type)
 {
     global $conn;
 
     // Fetch user type from the database based on user_id
     $user_type = getUserType($user_id);
 
-    $sql = "INSERT INTO lost_items (item_name, item_description, location, status, category_id, item_image, owner_id) VALUES (?, ?, ?, ?, ?, ?, ?)";
+    // Check if the report type is for security
+    if ($report_type === 'security') {
+        // If the report is for security, set the status to "found"
+        $status = 'found';
+    } else {
+        // Otherwise, use the value of $lost_or_found as status
+        $status = $lost_or_found;
+    }
+
+    $sql = "INSERT INTO lost_items (item_name, item_description, location, status, category_id, item_image, owner_id, report_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
     $stmt = mysqli_stmt_init($conn);
 
     if (!mysqli_stmt_prepare($stmt, $sql)) {
         return "sqlerror: " . mysqli_error($conn);
     } else {
-        mysqli_stmt_bind_param($stmt, "sssssss", $item_name, $description, $location, $lost_or_found, $category, $image, $user_id);
+        mysqli_stmt_bind_param($stmt, "ssssssss", $item_name, $description, $location, $status, $category, $image, $user_id, $report_type);
         if (mysqli_stmt_execute($stmt)) {
             mysqli_stmt_close($stmt);
 
@@ -262,4 +272,32 @@ function update_profile($image, $image1)
         }
     }
 }
-?>
+
+function submit_feedback($name, $email, $feedback_type, $message, $imagePaths) {
+    include 'dbh.inc.php';
+
+// Check if $imagePaths is not empty before imploding
+if (!empty($imagePaths)) {
+    // Convert array of image paths to a comma-separated string
+    $imagePathsString = implode(",", $imagePaths);
+} else {
+    // If $imagePaths is empty, set $imagePathsString to an empty string
+    $imagePathsString = '';
+}
+
+// Prepare the SQL statement to insert feedback into the database
+$sql = "INSERT INTO feedback (name, email, feedback_type, message, image_paths) VALUES (?, ?, ?, ?, ?)";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("sssss", $name, $email, $feedback_type, $message, $imagePathsString);
+
+    // Execute the SQL statement
+    if ($stmt->execute()) {
+        $stmt->close();
+        $conn->close();
+        return "success";
+    } else {
+        $stmt->close();
+        $conn->close();
+        return "sqlerror";
+    }
+}

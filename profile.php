@@ -47,7 +47,7 @@ if (isset($_SESSION['user_id'])) {
         echo '<div class="verification-message" style="background-color: #ff6666; padding: 10px; border-radius: 5px; text-align: center; font-size: 18px;">Your account verification is pending. Please be patient; the account verification may take a little while. You can come back later.</div>';
     } elseif ($verification_status === 'verified') {
         // User is verified and has a profile picture
-        echo '<img class="profile_pic" src="' . $profile_picture_path . '" alt="Profile Picture">';
+        echo '<img class="profile_pic" style="width:20%;" src="' . $profile_picture_path . '" alt="Profile Picture">';
     } elseif ($verification_status === 'rejected') {
         // User verification has been rejected
         echo '<div class="verification-message" style="background-color: #ff6666; padding: 10px; border-radius: 5px; text-align: center; font-size: 18px;">Your account verification has been rejected, Please retry the verification process! ';
@@ -70,7 +70,16 @@ if (isset($_SESSION['user_id'])) {
         <ul>
             <?php while ($itemRow = $itemResult->fetch_assoc()) { ?>
             <li>
-                <img src="<?php echo 'assets/images/items/' . $itemRow['item_image']; ?>" alt="Item Image">
+                <?php 
+                if ($itemRow["item_image"] !== "fileupload: 4") {
+                ?>
+                <img style="width:25%;" src="<?php echo 'assets/images/items/' . $itemRow['item_image']; ?>"
+                    alt="Item Image">
+                <?php }
+                    else {
+                    echo "<h5>No image For this item!</h5>";
+                    }
+                    ?>
                 <p><?php echo $itemRow['item_name']; ?></p>
             </li>
             <?php } ?>

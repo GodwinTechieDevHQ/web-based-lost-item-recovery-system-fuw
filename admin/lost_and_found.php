@@ -21,9 +21,9 @@ if ($result->num_rows > 0) {
 // Function to fetch lost and found items based on category and date
 function fetchItems($conn, $category, $date)
 {
-    $sql = "SELECT item_id, item_name, item_description, location, item_image, status, date_lost, owner_id FROM lost_items WHERE date_lost >= '$date' ORDER BY date_lost DESC";
+    $sql = "SELECT item_id, item_name, item_description, location, item_image, status, date_lost, owner_id, report_type FROM lost_items WHERE date_lost >= '$date' ORDER BY date_lost DESC";
     if ($category !== "all") {
-        $sql = "SELECT item_id, item_name, item_description, location, item_image, status, date_lost, owner_id FROM lost_items WHERE category_id = '$category' AND date_lost >= '$date' ORDER BY date_lost DESC";
+        $sql = "SELECT item_id, item_name, item_description, location, item_image, status, date_lost, owner_id, report_type FROM lost_items WHERE category_id = '$category' AND date_lost >= '$date' ORDER BY date_lost DESC";
     }
 
     $result = $conn->query($sql);
@@ -89,7 +89,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 echo '<img id="prof" src="' . $profile_picture . '" alt="' . $user_full_name . '">';
                 echo '<p class="fullname">' . $user_full_name . '</p>';
                 echo '</a>';
-                echo '<img class="item_img" src="' . "../assets/images/items/" . $item["item_image"] . '" alt="' . $item["item_name"] . '">';    
+                if ($item["item_image"] !== "fileupload: 4") {
+                    echo '<img class="item_img" src="' . "../assets/images/items/" . $item["item_image"] . '" style="width:100%;">';    
+                }
+                else
+                {
+                    echo "<h5>No image uploaded!</h5>";
+                }                
                 echo '<div class="item-details">';
                 echo '<h6 class="fw-bold ">Status: </h6>';
                 echo '<p>' . $item["status"] . '</p>';
@@ -99,8 +105,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 echo '<p>' . $item["item_description"] . '</p>';
 
                 echo '<h6 class="fw-bold ">Location:  </h6>';
-
                 echo '<p> ' . $item["location"] . '</p>';
+                echo '<h6 class="fw-bold ">Reported to:  </h6>';
+                echo '<p> ' . $item["report_type"] . '</p>';
                 echo '<p><b>Date: </b>' . date("d-m-Y H:i", strtotime($item["date_lost"])) . '</p> ';
 
                 // Check if the current user is the owner of the item

@@ -14,7 +14,7 @@ $(document).ready(function() {
             zIndex: "999"
         });
 
-        var fullscreenImage = $("<img>").attr("src", imgSrc).css({
+        var fullscreenImage = $("<img>").attr("src", imgSrc).addClass("fullscreen-image").css({
             maxWidth: "90%",
             maxHeight: "90%",
             cursor: "pointer",
@@ -38,9 +38,14 @@ $(document).ready(function() {
             });
         });
     }
+    // Add click event listener to the image with class "profile_pic"
 
-    // Add click event listener to the image with class "profile_pic" or "item_img"
-    $(".profile_pic, .item_img").on("click", function() {
+    $(".profile_pic").on("click", function() {
+        var imgSrc = $(this).attr("src");
+        openFullscreenImage(imgSrc);
+    });
+
+    $(".item_img").on("click", function() {
         var imgSrc = $(this).attr("src");
         openFullscreenImage(imgSrc);
     });

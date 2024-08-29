@@ -1,0 +1,27 @@
+/* Styles for help page elements */
+.container {
+    margin-top: 50px;
+}
+
+h1, h2, h3 {
+    color: #333;
+}
+
+p {
+    color: #666;
+}
+
+.help-image {
+    width: 100%;
+    /* Adjust the width as needed */
+    max-width: 400px;
+    /* Adjust the maximum width as needed */
+    height: auto;
+    /* Maintain aspect ratio */
+    display: block;
+    /* Ensure the image is centered */
+    margin: auto;
+    /* Center the image horizontally */
+    margin-top: 20px;
+    /* Add some top margin for spacing */
+}

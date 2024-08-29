@@ -1,17 +1,10 @@
 <?php
-include("header.php");
-include("includes/login_check.inc.php");
+// claim_item.php
+include("includes/dbh.inc.php"); // Include your database connection file
 
-session_start();
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Connect to your database (replace these with your actual database credentials)
-    include("includes/dbh.inc.php");
-    if ($conn->connect_error) {
-        die("Connection failed: " . $conn->connect_error);
-    }
-
-    // Get the transaction_id from the AJAX request
+// Check if the transaction ID is provided via POST
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["transaction_id"])) {
+    // Get the transaction ID from the POST data
     $transactionId = $_POST["transaction_id"];
 
     // Fetch the corresponding item_id for the transaction
@@ -40,18 +33,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!$stmtLostItems->execute() || !$stmtTransactions->execute()) {
         $success = false;
         $conn->rollback();
-        header("Location:profile.php");
+        echo json_encode(['success' => false]);
     } else {
         $conn->commit();
+        echo json_encode(['success' => true]);
     }
 
     $stmtLostItems->close();
     $stmtTransactions->close();
     $conn->close();
-
-    echo json_encode(['success' => $success]);
 } else {
-    header("Location: index.php");
-    exit();
+    // If transaction ID is not provided, return an error response
+    echo json_encode(['success' => false, 'error' => 'Transaction ID not provided']);
 }
 ?>

@@ -1,3 +1,4 @@
+<!-- home.php -->
 <?php
 include("header.php");
 
@@ -7,7 +8,7 @@ include("includes/login_check.inc.php");
 // Connect to your database (you should replace these with your actual database credentials)
 include('includes/dbh.inc.php');
 
-// Function to fetch 4 latest lost items
+// Function to fetch 10 latest lost items
 $dir = "assets/images/items/";
 
 function fetchLatestLostItems($conn)
@@ -53,18 +54,16 @@ function fetchRecentFeedback($conn)
 
 // Check if the user has a profile picture
 $user_id = $_SESSION['user_id'];
-$sqlProfile = "SELECT profile_picture FROM users WHERE user_id = ?";
-$stmt = $conn->prepare($sqlProfile);
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$resultProfile = $stmt->get_result();
+$sqlProfile = "SELECT profile_picture FROM users WHERE user_id = '$user_id'";
+$resultProfile = $conn->query($sqlProfile);
 
 $hasProfilePicture = false;
 
 if ($resultProfile->num_rows > 0) {
-    $rowProfile = $resultProfile->fetch_assoc();
-    $hasProfilePicture = !empty($rowProfile['profile_picture']);
+$rowProfile = $resultProfile->fetch_assoc();
+$hasProfilePicture = !empty($rowProfile['profile_picture']);
 }
+
 ?>
 
 <div class="in-body">
@@ -73,25 +72,31 @@ if ($resultProfile->num_rows > 0) {
     if (!$hasProfilePicture) {
         echo '<div class="alert alert-warning" role="alert">';
         echo 'Hello ' . $_SESSION['first_name'] . '! Please upload a picture of your face and a picture of your ID card for verification. ';
-        echo '<a href="update_profile.php" class="alert-link">Update Profile</a>';
+        echo '<a href="update_profile.php" class="alert-link">Verify account</a>';
         echo '</div>';
     }
     ?>
 
     <div class="items-lost-today">
-        <h2>Latest Lost Items</h2>
+        <h2>Recently Reported Items</h2>
         <div class="container-fluid" style="overflow-x: auto; white-space: nowrap;">
             <?php
             $items = fetchLatestLostItems($conn);
             foreach ($items as $item) {
                 echo '<div class="item" style="display: inline-block; white-space: normal; max-width: 200px; margin:4px;">';
-                echo '<img src="'. $dir . $item["item_image"] . '" alt="' . $item["item_name"] . '">';
+                if ($item["item_image"] !== "fileupload: 4") {
+                    echo '<img class="item_img" src="' . "assets/images/items/" . $item["item_image"] . '" style="width:100%;">';    
+                }
+                else
+                {
+                    echo "<h5>No image uploaded!</h5>";
+                }                
                 echo '<div class="item-details">';
-                echo '<p>Status: ' . $item["status"] . '</p>';
-                echo '<p>Name: ' . $item["item_name"] . '</p>';
-                echo '<p>Description: ' . $item["item_description"] . '</p>';
-                echo '<p>Location: ' . $item["location"] . '</p>';
-                echo '<p>Date: ' . $item["date_lost"] . '</p>';
+                echo '<p><b>Status:</b> ' . $item["status"] . '</p>';
+                echo '<p><b>Name:</b> ' . $item["item_name"] . '</p>';
+                echo '<p><b>Description:</b> ' . $item["item_description"] . '</p>';
+                echo '<p><b>Location:</b> ' . $item["location"] . '</p>';
+                echo '<p><b>Date:</b> ' . $item["date_lost"] . '</p>';
                 echo '</div>';
                 echo '</div>';
             }
@@ -101,21 +106,6 @@ if ($resultProfile->num_rows > 0) {
         </div>
     </div>
 
-    <div class="recent-feedback">
-        <h2>Recent Feedback</h2>
-        <ul>
-            <?php
-            $feedback = fetchRecentFeedback($conn);
-            foreach ($feedback as $entry) {
-                echo '<li>';
-                echo '<strong>' . htmlspecialchars($entry["first_name"]) . ':</strong> ';
-                echo '<p>' . htmlspecialchars($entry["feedback_text"]) . '</p>';
-                echo '<p><small>' . date("F j, Y, g:i a", strtotime($entry["feedback_date"])) . '</small></p>';
-                echo '</li>';
-            }
-            ?>
-        </ul>
-    </div>
 </div>
 
 <?php include("footer.php"); ?>

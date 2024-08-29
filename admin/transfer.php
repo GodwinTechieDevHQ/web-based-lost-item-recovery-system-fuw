@@ -1,13 +1,12 @@
-<!-- transfer.php -->
 <?php
-// Include necessary files and perform authentication
+// Include necessary files
 include("header.php");
 
 // Check if the user is logged in
-include("../includes/login_check.inc.php");
+include("includes/login_check.inc.php");
 
 // Include database connection
-include('../includes/dbh.inc.php');
+include('includes/dbh.inc.php');
 
 // Retrieve user ID from the session
 $user_id = $_SESSION['user_id'];
@@ -18,12 +17,11 @@ $other_user_id = isset($_GET['other_user_id']) ? $_GET['other_user_id'] : null;
 // Set other_user_id in the session
 $_SESSION['other_user_id'] = $other_user_id;
 
-// Fetch the list of items in the user's possession (replace with your logic)
+// Fetch the list of items in the user's possession
 $items = fetchUserItems($conn, $user_id);
 
 function fetchUserItems($conn, $user_id) {
     // Implement your database query to fetch items in the user's possession
-    // Replace this query with your actual query
     $sql = "SELECT item_id, item_name, item_image FROM lost_items WHERE owner_id = $user_id";
     
     // Use prepared statements to prevent SQL injection
@@ -39,6 +37,7 @@ function fetchUserItems($conn, $user_id) {
     return $items;
 }
 ?>
+
 <!-- HTML and Form for Transfer -->
 <div class="transfer-container">
     <h2>Select an Item to Transfer</h2>
@@ -57,21 +56,17 @@ function fetchUserItems($conn, $user_id) {
     <div id="itemDetails" style="display: none;">
         <h3>Item Details</h3>
         <p id="itemName"></p>
-        <img src="" id="itemImage" class="item_img" alt="Item Image">
-        <!-- Add more details as needed -->
-        <button type="button" class="initiateTransferButton" style="display: none;">Initiate Transfer</button>
-
-        <!-- <button type="button" class="initiateTransferButton">Initiate Transfer</button> -->
+        <img src="" id="itemImage" class="item_img" alt="Item Image" style="width: 70%;">
     </div>
 
     <!-- Display success message and redirect link -->
     <div id="transferSuccessMessage" style="display: none;">
+
         <p id="successMessage">Item transferred successfully!</p>
-        <a id="profileLink" href="profile.php">Go to Profile</a>
+        <a id="profileLink" href="transactions.php">Go to Transactions</a>
     </div>
 </div>
 
-<!-- Include your JavaScript for handling the transfer process -->
 <script src="jquery.js"></script>
 <script>
 $(document).ready(function() {
@@ -84,7 +79,7 @@ $(document).ready(function() {
             $("#itemName").text("Item Name: " + selectedItem.item_name);
 
             // Concatenate base URL with the item image filename
-            var itemImagePath = "../assets/images/items/" + selectedItem.item_image;
+            var itemImagePath = "assets/images/items/" + selectedItem.item_image;
 
             $("#itemImage").attr("src", itemImagePath);
             $("#itemDetails").show();
@@ -94,31 +89,31 @@ $(document).ready(function() {
 
     // Function to initiate transfer when the button is clicked
     $(".initiateTransferButton").click(function() {
-        // Perform actions to initiate transfer (e.g., show confirmation popup)
-        var selectedItem = findItemById($("#itemSelect").val());
+        var selectedItemId = $("#itemSelect").val();
+        var confirmation = confirm(
+            "Are you sure you want to transfer this item?");
 
-        if (selectedItem) {
-            if (confirm("Are you sure you want to transfer the item: " + selectedItem.item_name +
-                    "?")) {
-                // Make an AJAX request to transfer_confirm.php
-                $.post("transfer_confirm.php", {
-                    user_id: <?php echo $_SESSION['user_id']; ?>,
-                    other_user_id: <?php echo $other_user_id; ?>,
-                    item_id: selectedItem.item_id
-                }, function(response) {
-                    console.log(response); // Log the response to the console
-                    // Handle the response from the server
-                    if (response.success) {
-                        // Show success message and redirect link
-                        $("#transferSuccessMessage").show();
-                        $("#profileLink").attr("href", "profile.php");
-                        // Hide other elements
-                        $("#itemDetails, .initiateTransferButton").hide();
-                    } else {
-                        alert("Transfer failed!");
-                    }
-                }, "json");
-            }
+        if (confirmation) {
+            // Make an AJAX request to transfer_confirm.php
+            $.post("transfer_confirm.php", {
+                user_id: <?php echo $_SESSION['user_id']; ?>,
+                other_user_id: <?php echo $other_user_id; ?>,
+                item_id: selectedItemId
+            }, function(response) {
+                console.log(response); // Log the response to the console
+                // Handle the response from the server
+                if (response.success) {
+                    // Show success message and redirect link
+                    $("#transferSuccessMessage").show();
+                    $("#profileLink").attr("href", "profile.php");
+                    // Hide other elements
+                    $("#itemDetails, .initiateTransferButton").hide();
+                } else {
+                    alert(
+                        "Transaction already exists! Notify the receiver to check for the transaction"
+                    );
+                }
+            }, "json");
         }
     });
 

@@ -44,7 +44,7 @@
 
     <main>
         <?php if (isset($_SESSION["user_id"])) { ?>
-        <nav class="navbar navbar-expand-md navbar-dark bg-dark" aria-label="Fourth navbar example">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark" aria-label="Fourth navbar example">
             <div class="container-fluid">
                 <a class="navbar-brand" href="#">Lost And Found</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
@@ -86,6 +86,11 @@
                         <li
                             class="nav-item <?php echo (basename($_SERVER['PHP_SELF']) == 'transactions.php') ? 'active' : ''; ?>">
                             <a class="nav-link" href="transactions.php">Transactions</a>
+                        </li>
+
+                        <li
+                            class="nav-item <?php echo (basename($_SERVER['PHP_SELF']) == 'feedback.php') ? 'active' : ''; ?>">
+                            <a class="nav-link" href="feedback.php">Feedback</a>
                         </li>
 
                         <li class="nav-item dropdown">

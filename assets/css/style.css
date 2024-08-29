@@ -7,11 +7,11 @@ body {
     margin: 0;
     padding: 0;
     position: absolute;
-    background-color: #e1e1e1;
+    background-color: #cfcfcf;
     background-repeat: no-repeat;
     background-size: cover;
     background-attachment: fixed;
-    font-family: Arial, sans-serif;
+    font-family: 'Times New Roman';
     font-size: medium;
 }
 
@@ -197,7 +197,7 @@ button:hover {
     border-radius: 5px;
     overflow: hidden;
     width: 44%;
-    background-color: #fff;
+    background-color: #ffffff;
 }
 
 .item:hover {
